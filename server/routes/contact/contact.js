@@ -3,7 +3,7 @@ import { Contact } from "../../models/contact"
 
 const showAllContacts = async (req, res) => {
     try {
-        Contact.find({ user: req.decoded.user }, (err, data) => {
+        Contact.find({ user: req.decoded.user }, { email: 1, name: 1, phone: 1, created_at: 1 }, (err, data) => {
             if (err)
                 sendErrorResponse(res, err)
             else
@@ -33,18 +33,24 @@ const showContact = async (req, res) => {
 
 const addContact = async (req, res) => {
     try {
-        const contact = new Contact({
-            name: req.body.name,
-            email: req.body.email,
-            phone: req.body.phone,
-            user: req.decoded.user
-        })
-        contact.save((err, data) => {
-            if (err)
-                sendErrorResponse(res, "Contact not saved")
-            else
-                sendSuccessResponse(res, "Contact added")
-        })
+        const is_contact = await Contact.findOne({ user: req.decoded.user, phone: req.body.phone })
+        if (is_contact) {
+            sendErrorResponse(res, "Contact already stored")
+        }
+        else {
+            const contact = new Contact({
+                name: req.body.name,
+                email: req.body.email,
+                phone: req.body.phone,
+                user: req.decoded.user
+            })
+            contact.save((err, data) => {
+                if (err)
+                    sendErrorResponse(res, "Contact not saved")
+                else
+                    sendSuccessResponse(res, "Contact added")
+            })
+        }
     }
     catch (error) {
         console.log('error -- ', error)

@@ -64,7 +64,7 @@ const userLogin = async (req, res) => {
                         expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
                     });
                 sendSuccessResponse(res, {
-                    name: is_user.first_name,
+                    name: is_user.name,
                     email: is_user.email,
                     created_at: is_user.created_at,
                     token,
@@ -104,9 +104,9 @@ const confirmEmail = async (req, res) => {
 const getNewUserToken = async (req, res) => {
     try {
         let token_data = await AuthToken.findOne({
-            token: req.headers.request_token,
+            token: req.body.request_token,
         });
-        let user_data = await UserModel.findById({ _id: token_data.user });
+        let user_data = await User.findById({ _id: token_data.user });
         const token = jwt.sign({ user: user_data._id }, process.env.ACCESS_TOKEN_SECRET, {
             expiresIn: process.env.ACCESS_TOKEN_LIFE,
         });
